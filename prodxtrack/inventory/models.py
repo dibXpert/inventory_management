@@ -27,6 +27,8 @@ class Inbound(models.Model):
     reference = models.CharField(max_length=255, blank=True,null=True)
     remarks = models.TextField(blank=True, null=True)
     date_received = models.DateField(auto_now_add=True)
+    supplier_name = models.CharField(max_length=255)
+
     
     def __str__(self):
         return f"{self.product.name} - {self.quantity} received"
@@ -38,6 +40,7 @@ class Outbound(models.Model):
     reference = models.CharField(max_length=255, blank=True,null=True)
     remarks = models.TextField(blank=True, null=True)
     date_shipped = models.DateField(auto_now_add=True)
+    customer_name = models.CharField(max_length=255)
     
     def __str__(self):
         return f"{self.product.name} - {self.quantity} shipped"
