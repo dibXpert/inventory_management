@@ -15,7 +15,7 @@ class InboundForm(forms.ModelForm):
        
 class OutboundForm(forms.ModelForm):
     class Meta:
-        model = Inbound
+        model = Outbound
         fields = ['product_sku', 'quantity','destination', 'reference', 'remarks','date_shipped','customer_name']
 
 
