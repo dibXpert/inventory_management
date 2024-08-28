@@ -1,17 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DELETE</title>
-</head>
+{% extends 'inventory/base.html' %}
+
+{% block content %}
+
 <body>
     <h1>Delete Product</h1>
-    <p>Are you sure you want to delete "{{ product.name }}"?</p>
+    <p>Are you sure you want to delete item: "{{ item.name }}"?</p>
     <form method="post">
         {% csrf_token %}
-        <button type="submit">Delete</button>
+        <button class="btn btn-danger" type="submit">Delete</button>
         <a href="{% url 'inventory_list' %}" class="btn btn-secondary">Cancel</a>
     </form>
 </body>
-</html>
+{% endblock  %}

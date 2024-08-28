@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
+# UserProfile to manage roles.
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     is_manager = models.BooleanField(default=False)
@@ -17,8 +17,9 @@ class Inventory(models.Model):
     quantity = models.IntegerField()
     supplier = models.CharField(max_length=255)
     
+    #name
     def __str__(self):
-        return self.name
+        return  f"{self.sku} - {self.name}"
     
     class Meta:
         verbose_name = "Inventory"
@@ -36,6 +37,12 @@ class Inbound(models.Model):
     
     def __str__(self):
         return f"{self.product_sku.name} - {self.quantity} received"
+    
+    def save(self, *args, **kwargs):
+        # Update inventory quantity
+        self.product_sku.quantity = self.product_sku.quantity + self.quantity
+        self.product_sku.save()
+        super(Inbound, self).save(*args, **kwargs)
 
 class Outbound(models.Model):
     product_sku = models.ForeignKey(Inventory, on_delete= models.CASCADE)
@@ -47,6 +54,12 @@ class Outbound(models.Model):
     customer_name = models.CharField(max_length=255)
     
     def __str__(self):
-        return f"{self.product_sku.name} - {self.quantity} shipped"
+        return (f"{self.product_sku.name} - {self.quantity} shipped")
+    
+    def save(self, *args, **kwargs):
+        # Update inventory quantity
+        self.product_sku.quantity = self.product_sku.quantity - self.quantity
+        self.product_sku.save()
+        super(Outbound, self).save(*args, **kwargs)
 
 

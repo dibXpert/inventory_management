@@ -12,6 +12,9 @@ urlpatterns = [
    
    #inbound
    path('inbound/',views.record_inbound, name='record_inbound'),
+   path('inbound/history/', views.view_inbound_history, name='view_inbound_history'),
+
    #outbound
    path('outbound/', views.record_outbound, name='record_outbound'), 
+   path('outbound/history/', views.view_outbound_history, name='view_outbound_history'),
 ]
