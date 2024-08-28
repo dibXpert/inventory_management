@@ -1,41 +1,61 @@
 {% extends 'inventory/base.html' %}
 
 {% block content %}
- 
-    <div class="container mt-4">
-        <h1>Inventory List</h1>
-        <a href="{% url 'add_inventory' %}" class="btn btn-primary mb-3">Add New Item</a>
-        <table class="table table-bordered">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Category</th>
-                    <th>SKU</th>
-                    <th>Name</th>
-                    <th>Location</th>
-                    <th>Quantity</th>
-                    <th>Supplier</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in items %}
-                <tr>
-                    <td>{{ item.category }}</td>
-                    <td>{{ item.sku }}</td>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.location }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>{{ item.supplier }}</td>
-                    <td>
-                        <a href="{% url 'edit_inventory' item.id %}" class="btn btn-warning">Edit</a>
-                        <a href="{% url 'delete_inventory' item.id %}" class="btn btn-danger">Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+
+<div class="container mt-4">
+    <h1>Inventory List</h1>
+    <!-- Search Form -->
+    <form method="GET" action="{% url 'inventory_list' %}" class="form-inline mb-3">
+        <div class="form-group mr-2">
+            <label for="search_field" class="mr-2">Search by:</label>
+            <select name="search_field" id="search_field" class="form-control">
+                <option value="category" {% if search_field == "category" %}selected{% endif %}>Category</option>
+                <option value="sku" {% if search_field == "sku" %}selected{% endif %}>SKU</option>
+                <option value="name" {% if search_field == "name" %}selected{% endif %}>Name</option>
+                <option value="location" {% if search_field == "location" %}selected{% endif %}>Location</option>
+                <option value="supplier" {% if search_field == "supplier" %}selected{% endif %}>Supplier</option>
+            </select>
+        </div>
+        <div class="form-group mr-2">
+            <input type="text" name="q" placeholder="Enter search term" value="{{ query|default:'' }}" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary mr-2">Search</button>
+        <a href="{% url 'inventory_list' %}" class="btn btn-secondary">Clear Search</a>
+    </form>
+
+    <a href="{% url 'add_inventory' %}" class="btn btn-primary mb-3">Add New Item</a>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Category</th>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Quantity</th>
+                <th>Supplier</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.category }}</td>
+                <td>{{ item.sku }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.location }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.supplier }}</td>
+                <td>
+                    <a href="{% url 'edit_inventory' item.id %}" class="btn btn-warning">Edit</a>
+                    <a href="{% url 'delete_inventory' item.id %}" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 </body>
+
 </html>
 
 {% endblock %}

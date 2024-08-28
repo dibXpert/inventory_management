@@ -4,6 +4,23 @@
 
 <body>
     <h1>Outbound History</h1>
+     <!-- Search Form -->
+     <form method="GET" action="{% url 'view_outbound_history' %}" class="form-inline mb-3">
+        <div class="form-group mr-2">
+            <label for="search_field" class="mr-2">Search by:</label>
+            <select name="search_field" id="search_field" class="form-control">
+                <option value="product_name" {% if search_field == "product_name" %}selected{% endif %}>Product Name</option>
+                <option value="destination" {% if search_field == "destination" %}selected{% endif %}>Destination</option>
+                <option value="customer_name" {% if search_field == "customer_name" %}selected{% endif %}>Customer Name</option>
+            </select>
+        </div>
+        <div class="form-group mr-2">
+            <input type="text" name="q" placeholder="Enter search term" value="{{ query|default:'' }}" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary mr-2">Search</button>
+        <a href="{% url 'view_outbound_history' %}" class="btn btn-secondary">Clear Search</a>
+    </form>
+
     <a href="{% url 'record_outbound' %}" class="btn btn-primary mb-3">Add New Outbound Record</a>
     <table class="table table-bordered">
         <thead class="thead-light">

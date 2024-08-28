@@ -38,11 +38,6 @@ class Inbound(models.Model):
     def __str__(self):
         return f"{self.product_sku.name} - {self.quantity} received"
     
-    def save(self, *args, **kwargs):
-        # Update inventory quantity
-        self.product_sku.quantity = self.product_sku.quantity + self.quantity
-        self.product_sku.save()
-        super(Inbound, self).save(*args, **kwargs)
 
 class Outbound(models.Model):
     product_sku = models.ForeignKey(Inventory, on_delete= models.CASCADE)
@@ -56,10 +51,6 @@ class Outbound(models.Model):
     def __str__(self):
         return (f"{self.product_sku.name} - {self.quantity} shipped")
     
-    def save(self, *args, **kwargs):
-        # Update inventory quantity
-        self.product_sku.quantity = self.product_sku.quantity - self.quantity
-        self.product_sku.save()
-        super(Outbound, self).save(*args, **kwargs)
+
 
 

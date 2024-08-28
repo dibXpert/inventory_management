@@ -10,9 +10,26 @@ def index(request):
 
 # CRUD inventory
 def inventory_list(request):
+    search_field = request.GET.get('search_field')  # Get the field to search by (e.g., 'category', 'sku', etc.)
+    query = request.GET.get('q')  # Get the search term
     items = Inventory.objects.all()
+
+    if query and search_field:
+        if search_field == 'category':
+            items = items.filter(category__icontains=query)
+        elif search_field == 'sku':
+            items = items.filter(sku__icontains=query)
+        elif search_field == 'name':
+            items = items.filter(name__icontains=query)
+        elif search_field == 'location':
+            items = items.filter(location__icontains=query)
+        elif search_field == 'supplier':
+            items = items.filter(supplier__icontains=query)
+    
     context = {
-        'items':items,
+        'items': items,
+        'query': query,
+        'search_field': search_field,
     }
     return render(request, 'inventory/inv_list.html', context)
 
@@ -59,13 +76,21 @@ def delete_inventory(request,pk):
     }
     return render(request, 'inventory/delete_inv.html', context)
 
+
+
+
 # INBOUND
 def record_inbound(request):
     if request.method == 'POST':
         form = InboundForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('inventory_list')
+            inbound_record = form.save(commit=False)  # Create the Inbound object but don't save it yet
+            # Update the inventory quantity
+            inbound_record.product_sku.quantity += inbound_record.quantity
+            inbound_record.product_sku.save()
+            # Save the inbound record
+            inbound_record.save()
+            return redirect('view_inbound_history')
     else:
         form = InboundForm()
         
@@ -74,24 +99,41 @@ def record_inbound(request):
     }
     return render(request, 'inventory/record_inbound.html', context)
 
+
 def view_inbound_history(request):
+    search_field = request.GET.get('search_field')  
+    query = request.GET.get('q')  # Get the search term
     inbound_records = Inbound.objects.all().order_by('-date_received')
+
+    if query and search_field:
+        if search_field == 'product_name':
+            inbound_records = inbound_records.filter(product_sku__name__icontains=query)
+        elif search_field == 'supplier_name':
+            inbound_records = inbound_records.filter(supplier_name__icontains=query)
+        elif search_field == 'location':
+            inbound_records = inbound_records.filter(location__icontains=query)
+    
     context = {
         'inbound_records': inbound_records,
+        'query': query,
+        'search_field': search_field,
     }
     return render(request, 'inventory/inbound_history.html', context)
-
 
 # OUTBOUND
 def record_outbound(request):
     if request.method == 'POST':
         form =  OutboundForm(request.POST)
         if form.is_valid():
-            outbound_record = form.save(commit=False)
+            outbound_record = form.save(commit=False)  # Create the Outbound object but don't save it yet
             if outbound_record.quantity > outbound_record.product_sku.quantity:
                 messages.error(request, 'Error: Not enough inventory for this outbound operation.')
                 return redirect('record_outbound')
             else:
+                # Update the inventory quantity
+                outbound_record.product_sku.quantity -= outbound_record.quantity
+                outbound_record.product_sku.save()
+                # Save the outbound record
                 outbound_record.save()
                 messages.success(request, 'Outbound record added successfully.')
                 return redirect('inventory_list')
@@ -103,9 +145,23 @@ def record_outbound(request):
     }
     return render(request, 'inventory/record_outbound.html', context)
 
+
 def view_outbound_history(request):
+    search_field = request.GET.get('search_field')  
+    query = request.GET.get('q') 
     outbound_records = Outbound.objects.all().order_by('-date_shipped')
+
+    if query and search_field:
+        if search_field == 'product_name':
+            outbound_records = outbound_records.filter(product_sku__name__icontains=query)
+        elif search_field == 'destination':
+            outbound_records = outbound_records.filter(destination__icontains=query)
+        elif search_field == 'customer_name':
+            outbound_records = outbound_records.filter(customer_name__icontains=query)
+    
     context = {
         'outbound_records': outbound_records,
+        'query': query,
+        'search_field': search_field,
     }
     return render(request, 'inventory/outbound_history.html', context)
