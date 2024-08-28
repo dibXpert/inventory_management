@@ -3,8 +3,50 @@ from .models import Inventory,Inbound,Outbound
 from .forms import InventoryForm, InboundForm, OutboundForm
 from django.contrib import messages
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import UserProfile
+from .forms import CreateUserForm
+from django.contrib.auth.models import User
+
+from django.contrib.auth import logout
+def custom_logout(request):
+    logout(request)
+    return redirect('login')
+
+@login_required
+def create_user(request):
+    if request.method == 'POST':
+        form = CreateUserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])  # Set password correctly
+            user.save()
+
+            # Create a UserProfile for the new user
+            is_manager = form.cleaned_data['is_manager']
+            UserProfile.objects.create(user=user, is_manager=is_manager)
+            return redirect('user_list')
+    else:
+        form = CreateUserForm()
+
+    context = {
+        'form': form,
+    }
+    return render(request, 'inventory/users/create_user.html', context)
+
+@login_required
+def user_list(request):
+    users = User.objects.all()
+    context = {
+        'users': users,
+    }
+    return render(request, 'inventory/users/user_list.html', context)
+
+def is_manager(user):
+    return user.userprofile.is_manager
 
 # Homepage
+@login_required
 def index(request):
     # Calculate the total number of unique categories
     total_categories = Inventory.objects.values('category').distinct().count()
@@ -33,6 +75,7 @@ def index(request):
     return render(request, 'inventory/index.html', context)
 
 # CRUD inventory
+@login_required
 def inventory_list(request):
     search_field = request.GET.get('search_field')  # Get the field to search by (e.g., 'category', 'sku', etc.)
     query = request.GET.get('q')  # Get the search term
@@ -57,7 +100,8 @@ def inventory_list(request):
     }
     return render(request, 'inventory/inv_list.html', context)
 
-
+@login_required
+@user_passes_test(is_manager)
 def add_inventory(request):
     if request.method == 'POST':
         form = InventoryForm(request.POST)
@@ -72,6 +116,8 @@ def add_inventory(request):
     }
     return render(request, 'inventory/add_inv.html',context)
 
+@login_required
+@user_passes_test(is_manager)
 def edit_inventory(request, pk):
     item = get_object_or_404(Inventory, pk=pk)
     if request.method == 'POST':
@@ -87,7 +133,9 @@ def edit_inventory(request, pk):
         'item':item,
     }
     return render(request, 'inventory/edit_inv.html', context)
-        
+
+@login_required
+@user_passes_test(is_manager)       
 def delete_inventory(request,pk):
     item = get_object_or_404(Inventory, pk=pk)
     if request.method == 'POST':
@@ -104,6 +152,7 @@ def delete_inventory(request,pk):
 
 
 # INBOUND
+@login_required
 def record_inbound(request):
     if request.method == 'POST':
         form = InboundForm(request.POST)
@@ -123,7 +172,7 @@ def record_inbound(request):
     }
     return render(request, 'inventory/record_inbound.html', context)
 
-
+@login_required
 def view_inbound_history(request):
     search_field = request.GET.get('search_field')  
     query = request.GET.get('q')  # Get the search term
@@ -145,6 +194,7 @@ def view_inbound_history(request):
     return render(request, 'inventory/inbound_history.html', context)
 
 # OUTBOUND
+@login_required
 def record_outbound(request):
     if request.method == 'POST':
         form =  OutboundForm(request.POST)
@@ -169,7 +219,7 @@ def record_outbound(request):
     }
     return render(request, 'inventory/record_outbound.html', context)
 
-
+@login_required
 def view_outbound_history(request):
     search_field = request.GET.get('search_field')  
     query = request.GET.get('q') 

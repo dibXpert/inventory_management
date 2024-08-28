@@ -22,8 +22,9 @@
         <button type="submit" class="btn btn-primary mr-2">Search</button>
         <a href="{% url 'inventory_list' %}" class="btn btn-secondary">Clear Search</a>
     </form>
-
+    {% if user.userprofile.is_manager %}
     <a href="{% url 'add_inventory' %}" class="btn btn-primary mb-3">Add New Item</a>
+    {% endif %}
     <table class="table table-bordered">
         <thead class="thead-dark">
             <tr>
@@ -46,8 +47,10 @@
                 <td>{{ item.quantity }}</td>
                 <td>{{ item.supplier }}</td>
                 <td>
+                    {% if user.userprofile.is_manager %}
                     <a href="{% url 'edit_inventory' item.id %}" class="btn btn-warning">Edit</a>
                     <a href="{% url 'delete_inventory' item.id %}" class="btn btn-danger">Delete</a>
+                    {% endif%}
                 </td>
             </tr>
             {% endfor %}

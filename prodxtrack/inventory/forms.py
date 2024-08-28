@@ -1,6 +1,18 @@
 from django import forms
 from .models import Inventory, Inbound, Outbound
 from django.forms.widgets import DateInput
+from django.contrib.auth.models import User
+
+
+class CreateUserForm(forms.ModelForm):
+    is_manager = forms.BooleanField(required=False, label='Is Manager?')
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'is_manager', 'password']
+        widgets = {
+            'password': forms.PasswordInput(),
+        }
 
 class InventoryForm(forms.ModelForm):
     class Meta:
