@@ -6,7 +6,31 @@ from django.contrib import messages
 
 # Homepage
 def index(request):
-    return render(request, 'inventory/index.html')
+    # Calculate the total number of unique categories
+    total_categories = Inventory.objects.values('category').distinct().count()
+    
+    # Manually calculate the total quantity in stock
+    total_stock_quantity = 0
+    for item in Inventory.objects.all():
+        total_stock_quantity += item.quantity
+    
+    # Manually calculate the total quantity of inbound transactions
+    total_inbound_quantity = 0
+    for inbound in Inbound.objects.all():
+        total_inbound_quantity += inbound.quantity
+    
+    # Manually calculate the total quantity of outbound transactions
+    total_outbound_quantity = 0
+    for outbound in Outbound.objects.all():
+        total_outbound_quantity += outbound.quantity
+    
+    context = {
+        'total_categories': total_categories,
+        'total_stock_quantity': total_stock_quantity,
+        'total_inbound_quantity': total_inbound_quantity,
+        'total_outbound_quantity': total_outbound_quantity,
+    }
+    return render(request, 'inventory/index.html', context)
 
 # CRUD inventory
 def inventory_list(request):

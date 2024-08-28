@@ -3,9 +3,46 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <h1>Welcome to ProdXtrack</h1>
-    <p>Inventory management system.</p>
+<h1 class="text-center my-4">Welcome to ProdXtrack</h1>
+<p class="text-center">Your inventory management system at a glance.</p>
 
-
-    
+<h2 class="text-center my-4">Summary</h2>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5 mb-4">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Categories</h5>
+                    <p class="card-text display-4">{{ total_categories }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5 mb-4">
+            <div class="card text-white bg-dark h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Stock Quantity</h5>
+                    <p class="card-text display-4">{{ total_stock_quantity }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-5 mb-4">
+            <div class="card text-white bg-info h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Inbound Quantity</h5>
+                    <p class="card-text display-4">{{ total_inbound_quantity }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5 mb-4">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Outbound Quantity</h5>
+                    <p class="card-text display-4">{{ total_outbound_quantity }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
