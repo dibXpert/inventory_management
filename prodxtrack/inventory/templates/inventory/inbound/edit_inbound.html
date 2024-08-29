@@ -1,0 +1,11 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+  <h2>Edit Inbound Record</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Changes</button>
+  </form>
+  <a href="{% url 'view_inbound_history' %}">Cancel</a>
+{% endblock %}

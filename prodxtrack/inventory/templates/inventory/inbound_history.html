@@ -1,8 +1,7 @@
 {% extends 'inventory/base.html' %}
 
 {% block content %}
-
-<body>
+<div class="container my-4">
     <h1>Inbound History</h1>
 
     <!-- Search Form -->
@@ -26,6 +25,7 @@
     </form>
 
     <a href="{% url 'record_inbound' %}" class="btn btn-primary mb-3">Add New Inbound Record</a>
+
     <table class="table table-bordered">
         <thead class="thead-light">
             <tr>
@@ -37,6 +37,7 @@
                 <th>Remarks</th>
                 <th>Date Received</th>
                 <th>Supplier Name</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -50,9 +51,13 @@
                 <td>{{ record.remarks }}</td>
                 <td>{{ record.date_received }}</td>
                 <td>{{ record.supplier_name }}</td>
+                <td>
+                    <a href="{% url 'edit_inbound' record.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'delete_inbound' record.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</body>
+</div>
 {% endblock %}

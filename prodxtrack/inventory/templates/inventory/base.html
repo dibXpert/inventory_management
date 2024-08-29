@@ -11,7 +11,11 @@
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{% url 'index' %}">ProdXtrack</a>
+        <a class="navbar-brand" href="{% url 'index' %}">ProdXtrack {% if user.userprofile.is_manager %}
+            <span class="badge badge-success">MANAGER</span>
+            {% endif %}
+        </a>
+
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -40,16 +44,17 @@
                 {% endif %}
             </ul>
             {% if user.is_authenticated %}
-       
-               
-         
+
+
+
             <span class="navbar-text ml-auto">
-                <a  href="{% url 'custom_logout' %}">Logout</a>
+                <a href="{% url 'custom_logout' %}">Logout</a>
                 [Logged in as {{ user.username }}]
             </span>
             {% endif %}
         </div>
     </nav>
+
 
     {% if messages %}
     <div class="container mt-3">

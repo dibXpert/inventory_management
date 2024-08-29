@@ -1,0 +1,16 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+
+<body>
+    <h2>Delete User</h2>
+    <p>Are you sure you want to delete {{ user.username }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">Delete</button>
+        <a class="btn btn-secondary" href="{% url 'user_list' %}">Cancel</a>
+    </form>
+</body>
+
+
+{% endblock %}

@@ -5,7 +5,7 @@ from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import UserProfile
-from .forms import CreateUserForm
+from .forms import CreateUserForm,EditUserForm
 from django.contrib.auth.models import User
 
 from django.contrib.auth import logout
@@ -13,26 +13,80 @@ def custom_logout(request):
     logout(request)
     return redirect('login')
 
+#user management
+
+def is_manager(user):
+    return user.userprofile.is_manager
+
+
 @login_required
 def create_user(request):
     if request.method == 'POST':
-        form = CreateUserForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])  # Set password correctly
+        user_form = CreateUserForm(request.POST)
+        if user_form.is_valid():
+            user = user_form.save(commit=False)
+            user.set_password(user_form.cleaned_data['password'])  # Set password correctly
             user.save()
 
             # Create a UserProfile for the new user
-            is_manager = form.cleaned_data['is_manager']
+            is_manager = user_form.cleaned_data['is_manager']
             UserProfile.objects.create(user=user, is_manager=is_manager)
             return redirect('user_list')
     else:
-        form = CreateUserForm()
+        user_form = CreateUserForm()
 
     context = {
-        'form': form,
+        'user_form': user_form,
     }
     return render(request, 'inventory/users/create_user.html', context)
+
+@login_required
+@user_passes_test(is_manager)
+def edit_user(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    # Retrieve the associated UserProfile instance
+    user_profile = get_object_or_404(UserProfile, user=user)
+
+    if request.method == 'POST':
+        user_form = EditUserForm(request.POST, instance=user)
+        if user_form.is_valid():
+            user = user_form.save(commit=False)
+            
+            # Update the UserProfile's is_manager field
+            user_profile.is_manager = user_form.cleaned_data['is_manager']
+            user_profile.save()
+
+            user.save()
+            return redirect('user_list')
+    else:
+        # Initialize the form with existing data, including the is_manager field
+        initial_data = {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'is_manager': user_profile.is_manager
+        }
+        user_form = EditUserForm(instance=user, initial=initial_data)
+
+    context = {
+        'user_form': user_form,
+        'user': user,
+    }
+    return render(request, 'inventory/users/edit_user.html', context)
+
+@login_required
+@user_passes_test(is_manager)
+def delete_user(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        user.delete()
+        return redirect('user_list')
+
+    context = {
+        'user': user,
+    }
+    return render(request, 'inventory/users/delete_user.html', context)
+
 
 @login_required
 def user_list(request):
@@ -42,8 +96,7 @@ def user_list(request):
     }
     return render(request, 'inventory/users/user_list.html', context)
 
-def is_manager(user):
-    return user.userprofile.is_manager
+
 
 # Homepage
 @login_required
@@ -163,6 +216,7 @@ def record_inbound(request):
             inbound_record.product_sku.save()
             # Save the inbound record
             inbound_record.save()
+            messages.success(request, 'Inbound record added successfully.')
             return redirect('view_inbound_history')
     else:
         form = InboundForm()
@@ -193,6 +247,51 @@ def view_inbound_history(request):
     }
     return render(request, 'inventory/inbound_history.html', context)
 
+@login_required
+@user_passes_test(is_manager)
+def edit_inbound(request, pk):
+    inbound_record = get_object_or_404(Inbound, pk=pk)
+    original_quantity = inbound_record.quantity
+
+    if request.method == 'POST':
+        form = InboundForm(request.POST, instance=inbound_record)
+        if form.is_valid():
+            updated_record = form.save(commit=False)
+
+            # Adjust the inventory quantity based on the updated inbound quantity
+            quantity_difference = updated_record.quantity - original_quantity
+            updated_record.product_sku.quantity += quantity_difference
+            updated_record.product_sku.save()
+            updated_record.save()
+            messages.success(request, 'Record edited successfully.')
+            return redirect('view_inbound_history')
+    else:
+        form = InboundForm(instance=inbound_record)
+
+    context = {
+        'form': form,
+        'inbound_record': inbound_record,
+    }
+    return render(request, 'inventory/inbound/edit_inbound.html', context)
+
+@login_required
+@user_passes_test(is_manager)
+def delete_inbound(request, pk):
+    inbound_record = get_object_or_404(Inbound, pk=pk)
+    
+    if request.method == 'POST':
+        # Revert the inventory quantity
+        inbound_record.product_sku.quantity -= inbound_record.quantity
+        inbound_record.product_sku.save()
+        inbound_record.delete()
+        messages.success(request, 'Record deleted successfully.')
+        return redirect('view_inbound_history')
+
+    context = {
+        'inbound_record': inbound_record,
+    }
+    return render(request, 'inventory/inbound/delete_inbound.html', context)
+
 # OUTBOUND
 @login_required
 def record_outbound(request):
@@ -210,7 +309,7 @@ def record_outbound(request):
                 # Save the outbound record
                 outbound_record.save()
                 messages.success(request, 'Outbound record added successfully.')
-                return redirect('inventory_list')
+                return redirect('view_outbound_history')
     else:
         form = OutboundForm()
         
@@ -239,3 +338,45 @@ def view_outbound_history(request):
         'search_field': search_field,
     }
     return render(request, 'inventory/outbound_history.html', context)
+
+@login_required
+@user_passes_test(is_manager)
+def edit_outbound(request, pk):
+    outbound_record = get_object_or_404(Outbound, pk=pk)
+    original_quantity = outbound_record.quantity
+
+    if request.method == 'POST':
+        form = OutboundForm(request.POST, instance=outbound_record)
+        if form.is_valid():
+            updated_record = form.save(commit=False)
+            quantity_difference = original_quantity - updated_record.quantity
+            updated_record.product_sku.quantity += quantity_difference  # Revert the outbound effect
+            updated_record.product_sku.save()
+            updated_record.save()
+            messages.success(request, 'Record edited successfully.')
+            return redirect('view_outbound_history')
+    else:
+        form = OutboundForm(instance=outbound_record)
+
+    context = {
+        'form': form,
+        'outbound_record': outbound_record,
+    }
+    return render(request, 'inventory/outbound/edit_outbound.html', context)
+
+@login_required
+@user_passes_test(is_manager)
+def delete_outbound(request, pk):
+    outbound_record = get_object_or_404(Outbound, pk=pk)
+    
+    if request.method == 'POST':
+        outbound_record.product_sku.quantity += outbound_record.quantity  # Revert the outbound effect
+        outbound_record.product_sku.save()
+        outbound_record.delete()
+        messages.success(request, 'Record deleted successfully.')
+        return redirect('view_outbound_history')
+
+    context = {
+        'outbound_record': outbound_record,
+    }
+    return render(request, 'inventory/outbound/delete_outbound.html', context)

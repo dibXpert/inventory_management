@@ -33,6 +33,7 @@
                 <th>Remarks</th>
                 <th>Date Shipped</th>
                 <th>Customer Name</th>
+                <th>Actions</th> 
             </tr>
         </thead>
         <tbody>
@@ -46,6 +47,10 @@
                 <td>{{ record.remarks }}</td>
                 <td>{{ record.date_shipped }}</td>
                 <td>{{ record.customer_name }}</td>
+                <td>
+                    <a href="{% url 'edit_outbound' record.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'delete_outbound' record.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

@@ -14,6 +14,13 @@ class CreateUserForm(forms.ModelForm):
             'password': forms.PasswordInput(),
         }
 
+class EditUserForm(forms.ModelForm):
+    is_manager = forms.BooleanField(required=False, label='Is Manager?')
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'is_manager']
+
 class InventoryForm(forms.ModelForm):
     class Meta:
         model = Inventory 
