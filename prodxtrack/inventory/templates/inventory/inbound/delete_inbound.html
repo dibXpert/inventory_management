@@ -7,5 +7,5 @@
     {% csrf_token %}
     <button type="submit" class="btn btn-danger">Delete</button>
   </form>
-  <a href="{% url 'view_inbound_history' %}">Cancel</a>
+  <a  class="btn btn-secondary" href="{% url 'view_inbound_history' %}">Cancel</a>
 {% endblock %}
